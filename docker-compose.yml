@@ -19,6 +19,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    networks:
+      - hatchet-network
   rabbitmq:
     image: "rabbitmq:3-management"
     hostname: "rabbitmq"
@@ -36,6 +38,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+    networks:
+      - hatchet-network
   migration:
     image: ghcr.io/hatchet-dev/hatchet/hatchet-migrate:latest
     environment:
@@ -43,6 +47,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - hatchet-network
   setup-config:
     image: ghcr.io/hatchet-dev/hatchet/hatchet-admin:latest
     command: /hatchet/hatchet-admin quickstart --skip certs --generated-config-dir /hatchet/config --overwrite=false
@@ -66,6 +72,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    networks:
+      - hatchet-network
   hatchet-engine:
     image: ghcr.io/hatchet-dev/hatchet/hatchet-engine:latest
     command: /hatchet/hatchet-engine --config /hatchet/config
@@ -84,6 +92,8 @@ services:
     volumes:
       - hatchet_certs:/hatchet/certs
       - hatchet_config:/hatchet/config
+    networks:
+      - hatchet-network
   hatchet-api:
     image: ghcr.io/hatchet-dev/hatchet/hatchet-api:latest
     command: /hatchet/hatchet-api --config /hatchet/config
@@ -102,14 +112,20 @@ services:
       - hatchet_certs:/hatchet/certs
       - hatchet_config:/hatchet/config
       - ./github.pem:/hatchet/github/github.pem # This line mounts your optional github pem
+    networks:
+      - hatchet-network
   hatchet-frontend:
     image: ghcr.io/hatchet-dev/hatchet/hatchet-frontend:latest
+    networks:
+      - hatchet-network
   caddy:
     image: caddy:2.7.6-alpine
     ports:
       - 8080:8080
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - hatchet-network
 
 volumes:
   hatchet_postgres_data:
@@ -117,3 +133,7 @@ volumes:
   hatchet_rabbitmq.conf:
   hatchet_config:
   hatchet_certs:
+
+networks:
+  hatchet-network:
+    driver: bridge

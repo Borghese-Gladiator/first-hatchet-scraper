@@ -5,7 +5,6 @@ import openai
 # This is a simple example of a workflow that uses the OpenAI GPT-3 model to generate an answer to a question.
 # The workflow is declared decorated with `@hatchet_workflow` and the steps are declared with `@hatchet_step`.
 
-
 @hatchet.workflow()
 class SimpleGenAiWorkflow:
     @hatchet.step()
